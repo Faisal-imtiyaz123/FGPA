@@ -1,138 +1,69 @@
-module basic_operation;
+module add(
+    input  wire  clk,        
+    input  wire  rst,       
+    input  wire [16:0] a,         
+    input  wire [16:0] b,         
+    output reg  [17:0] result     
+);
 
-real q_3_14 [0:47999];
-real q_15_2 [0:47999];
+reg [16:0] a_reg, b_reg;          
 
-
-
-task read_q_3_14;
-
-integer i,file;
-real val;
-begin
-    file = $fopen("q_3_14.txt","r");
-for(i=0;i<48000;i++)begin
-    $fscanf(file,"%f",q_3_14[i]);
-end
-$fclose(file);
-end
-endtask
-
-task read_q_5_12;
-
-integer i,file;
-real val;
-begin
-    file = $fopen("q_15_2.txt","r");
-    for(i=0;i<48000;i++)
-    begin
-      $fscanf(file,"%f",q_15_2[i]);
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        result   <= 17'b0;
+    end else begin
+         a_reg<=a;
+         b_reg<=b;
+         result <= {a_reg[16], a_reg} + {b_reg[16], b_reg};
     end
-  $fclose(file);
 end
 
-endtask
+endmodule
 
-function integer real_to_int;
-    input real num;
-    integer int_num;
-    real frac;
-    
-    begin
-        int_num = num; 
-        frac = num - int_num;
-        
-        if (frac >= 0.5) begin
-            real_to_int = int_num + 1;
-        end else begin
-            real_to_int = int_num;
-        end
+module subtract(
+    input  wire  clk,
+    input  wire  rst,
+    input  wire [16:0] a,
+    input  wire [16:0] b,
+    output reg  [17:0] result
+);
+
+reg [16:0] a_reg, b_reg, b_neg;
+
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        result   <= 17'b0;
+    end else begin
+            a_reg <= a;
+            b_reg <= b;
+            // Compute two's complement of b
+            b_neg <= ~b_reg + 1'b1;
+            // Add a and negated b
+            result <= {a_reg[16], a_reg} + {b_neg[16], b_neg};
     end
-endfunction
-
-function real convert;
-input real num; input integer m,n;
-real scale,scaled;
-integer rounded;
-real val;
-
-begin
-
-scale = 2**n;
-scaled = num*scale;
-rounded = real_to_int(scaled);
-val = rounded/scale;
-convert = val;
-
-end
-endfunction
-
-task add;
-
-integer i,file;
-real res,x;
-
-begin
-
-file = $fopen("add.txt","w");
-for(i=0;i<48000;i++)begin
-    x = convert(q_3_14[i],15,2);
-    res = x + q_15_2[i];
-    $fwrite(file,"%0.20f\n",res);
-end
-$fclose(file);
-
 end
 
-endtask
-
-task subtract;
-
-integer i,file;
-real res,x;
-
-begin
-
-file = $fopen("sub.txt","w");
-for(i=0;i<48000;i++)begin
-    x = convert(q_3_14[i],15,2);
-    res = x - q_15_2[i];
-    $fwrite(file,"%0.20f\n",res);
-end
-$fclose(file);
-
-end
+endmodule
 
 
-endtask
+module mul(
+    input  wire        clk,
+    input  wire        rst,
+    input  wire [16:0] a,
+    input  wire [16:0] b,
+    output reg  [33:0] result
+);
 
-task mul;
+reg [33:0] product;
 
-
-integer i,file;
-real res,val;
-
-begin
-
-file = $fopen("mul.txt","w");
-for(i=0;i<48000;i++)begin
-    res = q_3_14[i] * q_15_2[i];
-    val = convert(res,18,16);
-    $fwrite(file,"%0.20f\n",val);
-end
-$fclose(file);
-
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        result <= 34'b0;
+    end else begin
+        // Sign-extend and multiply
+        product <= {{17{a[16]}}, a} * {{17{b[16]}}, b};
+        result  <= product;
+    end
 end
 
-
-endtask
-
-initial begin
-    read_q_3_14();read_q_5_12();
-    add();subtract();mul();
-    // integer x;
-    // x = real_to_int(-3.6);
-    // $display(x);
-end
-
-endmodule;
+endmodule
