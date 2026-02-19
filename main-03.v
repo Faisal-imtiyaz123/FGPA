@@ -1,68 +1,59 @@
 module add(
-    input  wire  clk,        
-    input  wire  rst,       
-    input  wire [16:0] a,         
-    input  wire [16:0] b,         
-    output reg  [17:0] result     
+    input  wire        clk,
+    input  wire        rst,
+    input  wire [16:0] a, 
+    input  wire [16:0] b, 
+    output reg  [17:0] result
 );
 
-reg [16:0] a_reg, b_reg;          
-
-always @(posedge clk or posedge rst) begin
+always @(*) begin
     if (rst) begin
-        result   <= 17'b0;
+        result <= 18'b0;
     end else begin
-         a_reg<=a;
-         b_reg<=b;
-         result <= {a_reg[16], a_reg} + {b_reg[16], b_reg};
+        
+        result <= {{2{a[16]}}, a} + {{2{b[16]}}, b};
     end
 end
 
 endmodule
 
 module subtract(
-    input  wire  clk,
-    input  wire  rst,
-    input  wire [16:0] a,
+    input  wire        clk,
+    input  wire        rst,
+    input  wire [16:0] a, 
     input  wire [16:0] b,
     output reg  [17:0] result
 );
 
-reg [16:0] a_reg, b_reg, b_neg;
+wire [17:0] a_ext, b_ext, b_neg;
 
-always @(posedge clk or posedge rst) begin
+assign a_ext = {{2{a[16]}}, a};
+assign b_ext = {{2{b[16]}}, b};
+assign b_neg = ~b_ext + 18'b1; 
+
+always @(*) begin
     if (rst) begin
-        result   <= 17'b0;
+        result <= 18'b0;
     end else begin
-            a_reg <= a;
-            b_reg <= b;
-            // Compute two's complement of b
-            b_neg <= ~b_reg + 1'b1;
-            // Add a and negated b
-            result <= {a_reg[16], a_reg} + {b_neg[16], b_neg};
+        result <= a_ext + b_neg; 
     end
 end
 
 endmodule
 
-
 module mul(
     input  wire        clk,
     input  wire        rst,
-    input  wire [16:0] a,
+    input  wire [16:0] a, 
     input  wire [16:0] b,
     output reg  [33:0] result
 );
 
-reg [33:0] product;
-
-always @(posedge clk or posedge rst) begin
+always @(*) begin
     if (rst) begin
         result <= 34'b0;
     end else begin
-        // Sign-extend and multiply
-        product <= {{17{a[16]}}, a} * {{17{b[16]}}, b};
-        result  <= product;
+        result <= {{17{a[16]}}, a} * {{17{b[16]}}, b};
     end
 end
 
