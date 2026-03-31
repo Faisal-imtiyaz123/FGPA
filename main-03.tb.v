@@ -12,6 +12,11 @@ wire [16:0] q_3_14_aligned;
 wire [17:0] add_res, sub_res;
 wire [33:0] mul_res;
 
+reg [17:0] add_results [0:48000];
+reg [17:0] sub_results [0:48000];
+reg [33:0] mul_results [0:48000];
+
+
 reg [16:0] i;
 
 
@@ -56,14 +61,20 @@ mul mul_mod (
 
 always #1 clk = ~clk;
 
+
 always @(posedge clk or posedge rst) begin
     if (rst) begin
         q_3_14_reg <= 17'b0;
         q_5_12_reg <= 17'b0;
         i <= 17'b0;
-    end else if(i < 48000) begin
-        q_3_14_reg <= q_3_14[i];  
-        q_5_12_reg <= q_5_12[i];
+    end else if(i < 48001) begin
+        if(i<48000)begin
+            q_3_14_reg <= q_3_14[i];  
+            q_5_12_reg <= q_5_12[i];
+        end
+        add_results[i]<=add_res;
+        mul_results[i]<=mul_res;
+        sub_results[i]<=sub_res;
         i <= i + 1;
     end
 end
@@ -90,6 +101,27 @@ task read_q_5_12;
     end
 endtask
 
+task writefiles;
+    integer f1, f2, f3;
+    integer k;
+    begin
+        f1 = $fopen("add.txt", "w");
+        f2 = $fopen("sub.txt", "w");
+        f3 = $fopen("mul.txt", "w");
+        
+        for(k = 0; k < 48001; k = k + 1) begin
+            $fwrite(f1, "%b\n", add_results[k]); 
+            $fwrite(f2, "%b\n", sub_results[k]);
+            $fwrite(f3, "%b\n", mul_results[k]);
+        end
+        
+        $fclose(f1);
+        $fclose(f2);
+        $fclose(f3);
+    end
+endtask
+
+
 initial begin
     $dumpfile("wave-03.vcd"); 
     $dumpvars(0, tb);
@@ -104,7 +136,9 @@ initial begin
     read_q_5_12(); 
     
     #2 rst = 0;
-    #500;
+    #96005;
+    
+    writefiles();
     $finish;
 end
 

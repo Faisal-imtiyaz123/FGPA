@@ -6,10 +6,10 @@ module newtonRaphson;
             D_out = D_in;
             while(D_out < 0.5 || D_out > 1) begin
                 if (D_out < 0.5) begin
-                    D_out = D_out * 2;
+                    D_out = D_out << 2;
                 end
                 else begin
-                    D_out = D_out / 2;
+                    D_out = D_out >> 2;
                 end
             end
         end
@@ -69,7 +69,7 @@ module newtonRaphson;
         end
     endfunction
 
-  function integer real_to_int;
+    function integer real_to_int;
     input real num;
     integer int_num;
     real frac;

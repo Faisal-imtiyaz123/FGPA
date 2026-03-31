@@ -10,7 +10,6 @@ always @(*) begin
     if (rst) begin
         result <= 18'b0;
     end else begin
-        
         result <= {{2{a[16]}}, a} + {{2{b[16]}}, b};
     end
 end
