@@ -1,7 +1,7 @@
-`timescale 1ns / 1ps
+`timescale 1ns / 1ps;
 
 module tb_fir_direct_form();
-    
+
     reg clk;
     reg rst_n;
     reg signed [15:0] test_input;
@@ -46,10 +46,7 @@ module tb_fir_direct_form();
         // Load coefficients from file
         $display("Loading filter coefficients...");
         coeff_file = $fopen("filter_coeffs_q214.txt", "r");
-        if (coeff_file == 0) begin
-            $display("Error: Could not open filter_coeffs_q214.txt");
-            $finish;
-        end
+
         
         for (i = 0; i < 100; i = i + 1) begin
             $fscanf(coeff_file, "%d\n", coeff_data[i]);
@@ -79,17 +76,9 @@ module tb_fir_direct_form();
             
             // Open input signal file
             signal_file_in = $fopen(input_filename, "r");
-            if (signal_file_in == 0) begin
-                $display("Error: Could not open %s", input_filename);
-                $finish;
-            end
             
             // Open output file
             signal_file_out = $fopen(output_filename, "w");
-            if (signal_file_out == 0) begin
-                $display("Error: Could not open %s", output_filename);
-                $finish;
-            end
             
             sample_count = 0;
             
