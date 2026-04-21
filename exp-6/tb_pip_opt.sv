@@ -5,8 +5,8 @@ module tb_fir_optimized();
     reg signed [15:0] din_950, din_1100, din_2000;
     reg signed [15:0] coeffs [0:99];
     reg signed [15:0] samples_950 [0:1052];
-    reg signed [15:0] samples_1100 [0:1052];
-    reg signed [15:0] samples_2000 [0:1052];
+    reg signed [15:0] samples_1100 [0:909];
+    reg signed [15:0] samples_2000 [0:499];
     reg signed [39:0] out_950 [0:1899];
     reg signed [39:0] out_1100 [0:1899];
     reg signed [39:0] out_2000 [0:1899];
@@ -19,7 +19,7 @@ module tb_fir_optimized();
     .dout(dout_950),
     .coeffs(coeffs)
 );
-        fir_optimized #(.TAPS(100)) u_dut2 (
+    fir_optimized #(.TAPS(100)) u_dut2 (
             .clk(clk),
             .rst_n(rst_n),
             .din(din_1100),
